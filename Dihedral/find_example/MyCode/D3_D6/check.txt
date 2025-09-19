@@ -1,0 +1,13 @@
+i := 40;
+G := SmallGroup(4*n*m,i);
+r := 1;
+normSubs := NormalSubgroups(G);
+nonTrivialNormSubs := [ N`subgroup : N in normSubs | #N`subgroup gt 1 and #N`subgroup lt #G ];
+
+
+
+
+
+for sub in nonTrivialNormSubs do
+    [#sub,#(K meet sub)];
+end for;

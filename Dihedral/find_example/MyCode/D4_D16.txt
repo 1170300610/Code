@@ -1,0 +1,168 @@
+/* Version4.
+list2 save the index rather than the group itself. So we can write and read it with a file.
+*/
+            
+
+
+
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    if CountElementsOfOrder(H, n) ne EulerPhi(n) then
+        return false;
+    end if;
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;
+
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "logical error";
+end function;
+
+n := 4;
+m := 16;
+list := SmallGroups(4*n*m,func<G|not IsAbelian(G) and IsSolvable(G)>);
+
+
+//list2 is a list of group which contains at least one dihedral subgroup
+//find all group G which contains D2n and D2m. Save it in the list2.
+globalStart := Realtime();
+list2 := [];
+count := 1;
+for i in [10001 .. 30000] do
+    G := list[i];
+    count;
+    count +:= 1;
+    subgroupsList_H := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    subgroupsList_K := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    flag_1 := 0;
+    flag_2 := 0;
+    for H in subgroupsList_H do
+        if(IsIsoDn(H,n)) then
+            flag_1 := 1;
+            break;
+        end if;
+    end for;
+    if flag_1 eq 0 then 
+        continue i;
+    end if;
+    for K in subgroupsList_K do
+        if(IsIsoDn(K,m)) then
+            flag_2 := 1;
+            break;
+        end if;
+    end for;
+    if flag_1 eq 1 and flag_2 eq 1 then
+        Append(~list2,i);
+    end if;
+end for;
+totalElapsed := Realtime(globalStart);
+printf "\nCounting list2 Total execution time: %o seconds\n", totalElapsed;
+
+
+
+//seqs is a list for the result
+globalStart := Realtime();
+count := 0;
+seqs := [];
+indexsOfExactProduct := [];
+for index in list2 do 
+    G := list[index];
+    count := count +1;
+    count;//for debug.
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    subD2n := [];
+    subD2m := [];
+    potential_combine := [];
+    potential_sub1 := {};
+    potential_sub2 := {};
+    for i in [1 .. #sub_2n] do
+        for j in [1 .. #sub_2m] do 
+            if #(sub_2n[i] meet sub_2m[j]) eq 1 then
+                Append(~potential_combine,[i,j]);
+                Include(~potential_sub1,i);
+                Include(~potential_sub2,j);
+            end if;
+        end for;
+    end for;
+    
+    for i in potential_sub1 do
+        if not IsIsoDn(sub_2n[i],n) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][1] eq i then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for j in potential_sub2 do
+        if not IsIsoDn(sub_2m[j],m) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][2] eq j then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for combine in potential_combine do 
+        Append(~dihedralsForG,[sub_2n[combine[1]],sub_2m[combine[2]]]);
+    end for;
+    
+    
+    //deal with G with H and K already found.
+    if #dihedralsForG ne 0 then
+        Append(~indexsOfExactProduct,count);
+    end if;
+end for;
+totalElapsed := Realtime(globalStart);
+printf "\nCounting indexsOfExactProduct total execution time: %o seconds\n", totalElapsed;
+

@@ -1,0 +1,37 @@
+G := list2[12];
+dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+for sub1 in sub_2n do
+    for sub2 in sub_2m do
+        if(IsIsomorphic(sub1,DihedralGroup(n)) and (IsIsomorphic(sub2,DihedralGroup(m)))) then
+            product := {};
+            for a in sub1 do
+                for b in sub2 do
+                    Include(~product, a*b);
+                end for;
+            end for;
+            if #product eq 2*2*n*m then
+                Append(~dihedralsForG,[sub1,sub2]);
+                break sub1;//find the first one ,then break. You can all cancel this line to find all.
+            end if;
+        end if;
+    end for;
+end for;
+
+H := dihedralsForG[1][1];
+K := dihedralsForG[1][2];
+a,b := DihedralGenerators(H);//find the generators
+c,d := DihedralGenerators(K);
+
+c_X := Core(G,sub<K|c>);
+G_hat ,proj := quo<G | c_X>;
+H_hat := proj(H);//you can't get it by H/<c>_X since c is not even in H.
+IsNormal(G_hat,H_hat);
+//whether a and c_X can exchange
+central_c_X := Centralizer(G,c_X);
+
+Normalizer(G,sub<K|c>);
+MaximalSubgroups(sub<K|c>);
+
+

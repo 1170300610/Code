@@ -1,0 +1,32 @@
+//the number should be an effective index
+G_2 := list2[12];
+function GeneratorForG(G,n,m)
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    for sub1 in sub_2n do
+        for sub2 in sub_2m do
+            if(IsIsomorphic(sub1,DihedralGroup(n)) and (IsIsomorphic(sub2,DihedralGroup(m)))) then
+                product := {};
+                for a in sub1 do
+                    for b in sub2 do
+                        Include(~product, a*b);
+                    end for;
+                end for;
+                if #product eq 2*2*n*m then
+                    x,y := DihedralGenerators(sub1);
+                    z,w := DihedralGenerators(sub2);
+                    return x,y,z,w;
+                end if;
+            end if;
+        end for;
+    end for;
+    "error not found gernerator of G";
+end function;
+
+x,y,z,w := GeneratorForG(G_2,n,m);
+iso2 := hom<G -> G_2 | [x,y,z,w]>;//this should be surjective and kernel =1.
+
+iso3 := hom<G -> G_2 | [G_2.1,G_2.2,G_2.3,G_2.4]>;//for compare, this is not surjective
+
+
+flagList :=

@@ -1,0 +1,25 @@
+/*  write file */
+filename := "src/Paper/D6_D16_indexsOfExactProduct.txt";
+F := Open(filename,"w");
+for item in indexsOfExactProduct do
+    Puts(F, Sprint(item));
+end for;
+Flush(F);
+delete F;
+
+
+/* read file */
+filename := "src/Paper/D6_D16_list2.txt";
+F := Open(filename,"r");
+recoveredList := [];
+for i in [1 .. 10000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    //i;
+    Append(~recoveredList,StringToInteger(line));
+end for;
+delete F;
+
+recoveredList eq list2;

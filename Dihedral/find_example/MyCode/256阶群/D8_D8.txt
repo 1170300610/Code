@@ -1,0 +1,340 @@
+/* load file 
+name : indexs_D2,indexs_D4,indexs_D8,indexs_D16,indexs_D32,indexs_D64
+It is a list of index of group that contain Di (in the list get from SmallGroups).
+ end load file */
+
+n := 8;
+m := 8;
+list := SmallGroups(4*n*m,func<G|not IsAbelian(G) and IsSolvable(G)>);
+
+/* start build list2 */ 
+list2 := [];
+for i in indexs_D8 do
+    Append(~list2,i);
+end for;
+/* end build list2 */
+
+/* function */
+
+function FindCommonElements(sortedA, sortedB)
+    commonList := [];  
+    idxA := 1;         
+    idxB := 1;         
+    
+    while idxA le #sortedA and idxB le #sortedB do
+        if sortedA[idxA] eq sortedB[idxB] then
+            Append(~commonList, sortedA[idxA]);
+            idxA +:= 1;  
+            idxB +:= 1;
+        elif sortedA[idxA] lt sortedB[idxB] then
+            idxA +:= 1;  
+        else
+            idxB +:= 1;  
+        end if;
+    end while;
+    
+    return commonList;
+end function;
+
+
+function isHKsubGroup(G, H, K)
+    I := H meet K;
+    S := sub<G | H,K>;
+    if Order(S) eq (Order(H) * Order(K))/Order(I) then
+        return true;
+    end if;
+    return false;
+end function;
+
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    if CountElementsOfOrder(H, n) ne EulerPhi(n) then
+        return false;
+    end if;
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;
+
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "logical error";
+end function;
+/* function */
+
+
+//seqs is a list for the result
+globalStart := Realtime();
+count := 0;
+seqs := [];
+indexsOfExactProduct := [];//save index of list2
+indexsOfExactProduct2 := [];//save index of list
+for index in list2 do 
+    G := list[index];
+    count := count +1;
+    count;//for debug.
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    subD2n := [];
+    subD2m := [];
+    potential_combine := [];
+    potential_sub1 := {};
+    potential_sub2 := {};
+    for i in [1 .. #sub_2n] do
+        for j in [1 .. #sub_2m] do 
+            if #(sub_2n[i] meet sub_2m[j]) eq 1 then
+                Append(~potential_combine,[i,j]);
+                Include(~potential_sub1,i);
+                Include(~potential_sub2,j);
+            end if;
+        end for;
+    end for;
+    
+    for i in potential_sub1 do
+        if not IsIsoDn(sub_2n[i],n) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][1] eq i then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for j in potential_sub2 do
+        if not IsIsoDn(sub_2m[j],m) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][2] eq j then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for combine in potential_combine do 
+        Append(~dihedralsForG,[sub_2n[combine[1]],sub_2m[combine[2]]]);
+    end for;
+    
+    
+    //deal with G with H and K already found.
+    if #dihedralsForG ne 0 then
+        Append(~indexsOfExactProduct,count);
+        Append(~indexsOfExactProduct2,index);
+    end if;
+end for;
+totalElapsed := Realtime(globalStart);
+printf "\nCounting indexsOfExactProduct total execution time: %o seconds\n", totalElapsed;
+
+
+//given a list2[] and seqs[][]
+//given a list indexsOfExactProduct element is index of which is exact product of dihedral Group.
+
+/*  H is the lower bound and H should be group.
+    Return a list which element is group */
+function MaximalSubgroupContaining(G,H)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        if H subset M then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/*  L is the lower bound,U is the upper bound. L and U can be set.
+    Return a list which element is group */
+function MaximalSubgroupBetween(G,L,U)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        M_set := {a : a in M };
+        L_set := {a : a in L };
+        U_set := {a : a in U };
+        if L_set subset M_set and M_set subset U_set then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+
+
+for i in indexsOfExactProduct do
+    index := list2[i];
+    G := list[index];
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    subD2n := [];
+    subD2m := [];
+    for sub1 in sub_2n do
+        if IsIsoDn(sub1,n) then
+            Append(~subD2n,sub1);
+        end if;
+    end for;
+    for sub2 in sub_2m do
+        if IsIsoDn(sub2,m) then
+            Append(~subD2m,sub2);
+        end if;
+    end for;
+    for sub1 in subD2n do
+        for sub2 in subD2m do
+            if #(sub1 meet sub2) eq 1 then
+                Append(~dihedralsForG,[sub1,sub2]);
+                break sub1;
+            end if;
+        end for;
+    end for;
+    
+
+    H := dihedralsForG[1][1];
+    K := dihedralsForG[1][2];
+    a,b := DihedralGenerators(H);//find the generators
+    c,d := DihedralGenerators(K);//alert if M contain a reflection ,this d might not be the one in M !!!!!
+
+    c_X := Core(G,sub<K|c>);
+    G_hat ,proj := quo<G | c_X>;
+    H_hat := proj(H);//you can't get it by H/<c>_X since c is not even in H.
+    flag_normal := IsNormal(G_hat,H_hat);
+    central_c_X := Centralizer(G,c_X);
+    flag_aInCentralize := a in central_c_X;
+    flag_a2InCentralize := a^2 in central_c_X;
+    flag1 := 0;
+    flag2 := 0;
+    flag3 := 0;
+    if flag_normal then
+        flag1 := 1;
+    end if;
+    if flag_aInCentralize then
+        flag2 := 1;
+    end if;
+    if flag_a2InCentralize then
+        flag3 := 1;
+    end if;
+    
+    
+    //deal with core M_X.
+    maximalList := MaximalSubgroupContaining(G,H);
+    if #maximalList eq 0 then 
+        "error with maximalList";
+    end if;
+    
+    flag4 := 0;
+    flag5 := 0;
+    M := maximalList[1];
+    M_X := Core(G,M);
+    G_hat2 ,proj2 := quo<G | M_X>;
+    H_hat2 := proj2(H);
+    c_hat2 := proj2(sub<K | c>);// to find out p.
+    d_in_MCore := d in M_X;
+    index_M_X := Index(G,M_X);
+    H_in_MCore := H subset M_X;
+    
+    if d_in_MCore then
+        flag4 := 1;
+    end if;
+    if H_in_MCore then
+        flag5 := 1;
+    end if;
+    
+    //10. whether <a,b><c> is a group
+    flag_HcIsGroup := 0;
+    Hc_isGroup := isHKsubGroup(G,H,sub<K | c>);
+    if Hc_isGroup then flag_HcIsGroup := 1;end if;
+    
+    //11. index of H/M_X.
+    index_HmodM_X := Index(G_hat2,H_hat2);
+    
+    //12. exist M = <a,b><c1> is maximal in X.
+    flag_exist_Maximal := 0;
+    product_Hc := {};
+    for a in H do
+        for b in sub< G | c > do
+            Include(~product_Hc, a*b);
+        end for;
+    end for;
+    maximalList2 := MaximalSubgroupBetween(G,H,product_Hc);
+    if #maximalList2 ne 0 then
+        flag_exist_Maximal := 1;
+    end if;
+    
+    //13. exist M = <a1><c,d> is maximal in X.
+    flag_exist_Maximal3 := 0;
+    product_aK := {};
+    for e1 in sub< G | a > do
+        for e2 in K do
+            Include(~product_aK, e1*e2);
+        end for;
+    end for;
+    maximalList3 := MaximalSubgroupBetween(G,K,product_aK);
+    if #maximalList3 ne 0 then
+        flag_exist_Maximal3 := 1;
+    end if;
+    /*[
+    1. index, 
+    2. core size of c_X, 
+    3. H/<c>_X is Normal in G/<c>_X, 
+    4. a is in centerlizer of c_X,
+    5. a is in centerlizer of c_X(should always 1),
+    6. c/M_X order, 
+    7. whether d is in M_Core,
+    8. index of M_X in X(G),if occur 2 then M=M_X=<a,b><c> (if #c/M_X = 1)or <a,b><c^2,d> (if #c/M_X = 1),
+    9. whether M_X contains H
+    10. whether <a,b><c> is a group
+    11. index of H/M_X.
+    12. exist M = <a,b><c1> is maximal in X.
+    13. exist M = <a1><c,d> is maximal in X.
+    ].*/
+    row := [index , #c_X , flag1 , flag2, flag3, #c_hat2, flag4, index_M_X, flag5, flag_HcIsGroup, index_HmodM_X, flag_exist_Maximal, flag_exist_Maximal3];
+    printf "[";
+    printf "%4o", row[1];
+    for j := 2 to #row do
+        printf ",%3o", row[j];
+    end for;
+    printf " ]\n";
+end for;

@@ -1,0 +1,86 @@
+%! Author = 10520
+%! Date = 2025/6/13
+
+\title{On exact products of two dihedral groups}
+\author{XX}
+\date{13 June 2025}
+%\maketitle
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+
+
+% Document
+\begin{document}
+
+    \section{Introduction}
+    A group X is \textit{factorizable} if X contains two subgroups $H$ and $K$ such that $X = HK$. The factorization is \textit{exact} if
+    $H \cap K ={1_X}$.
+    \section{Prepare}
+    Throughout the paper, we use notation X to denote an exact product of two dihedral subgroups $H = \langle a\rangle \rtimes \langle b\rangle \cong D_{2n}$ and
+    $K = \langle c\rangle \rtimes \langle d\rangle \cong D_{2m}$ where m,n $\ge$ 3.
+
+    Choose a maximal subgroup G of H such the $G \ge H$ then two situations happen (i) $G \cap K = \langle c_1\rangle$ (ii) $G \cap K = \langle c_1,d\rangle$
+    where $c_1 \in \langle c\rangle$.
+
+    First suppose that $G \cap K = \langle c_1\rangle$.It was classified by Yu Hao and Kan Hu \cite{Hu23032025} .Then exactly one of the following holds:
+    \begin{align}\label{align1}
+    & (i) G = G_X = H\langle c\rangle , X = (H\langle c\rangle) \rtimes \langle d\rangle , X/G_X \cong C_2.\\
+    & (ii) G = H\langle c^2\rangle , G_X = \langle a^3,c^2\rangle , X = (K\langle a\rangle) \rtimes \langle b\rangle \, and \, X/G_X \cong S_4.
+    \end{align}
+    Since exact product of a dihedral group and a cyclic group was classified by Yu Hao, the structure of X in this case is clear.
+
+    Now we assumed that $G \cap K = \langle c_1,d\rangle$.
+    Since
+    \begin{equation}\label{eq:equation2}
+        \langle c_1\rangle = \bigcap_{k,t \in \mathbb{Z}} \langle c_1\rangle^{c^{k}d^{t}} \le \bigcap_{k,t \in \mathbb{Z}} G^{c^{k}d^{t}} = \bigcap_{i,j,k,t \in \mathbb{Z}} G^{a^{i}b^{j}c^{k}d^{t}},
+    \end{equation}
+    we have $\langle c_1 \rangle \le G_X$.
+    Consider now the quotient group $\overline{X} := X/G_X$ .We have $\langle \overline{c} \rangle$ is cyclic, while $\overline{G}$ is a maximal stabilizer of G in $[X:G]$, so
+    $\langle \overline{c} \rangle \cap \overline{G} = \langle \overline{c_1} \rangle = \langle \overline{1} \rangle$. $\overline{X}$ is a primitive permutation group on the coset $[X:G]$ which
+    contain a cyclic regular subgroup $\langle \overline{c} \rangle$.By checking the result of Li \cite{li2006finite}, we have
+    $\mathbb{Z}_p \cong \langle \overline{c} \rangle \le \overline{X} \le AGL(1,p) $ with p prime.
+
+    If p = 2, then $\overline{X} \le \mathbb{Z}_2$, $\langle \overline{c} \rangle \cong \mathbb{Z}_2$,so $\overline{X} = \langle \overline{c} \rangle \cong \mathbb{Z}_2$ and
+    $\langle \overline{c_1} \rangle = \langle \overline{c^2} \rangle$ with m even. Since $|X:G| = 2$,$G \lhd X$ and $X = G \rtimes \langle c \rangle $ with $G = H\langle c^2,d \rangle$.
+    Let R denote the maximal subgroup of G contain H.
+    (1) If R = H, $G/R_G$ is a primitive permutation group on the coset $[G:R]$ containing a dihedral group $\langle c^2,d \rangle$ regular.
+    By checking the result of Li \cite{li2006finite},we have$(H,\langle c^2,d \rangle) = (A_4,D_4) , (S_4,D_4) or (PGL(2,1)C_f , D_4)$.
+    (2) If R contain an element of Klein group $\langle c^2,d \rangle$ with order 2.We may assume $c^2$ in R, then $c^2 \in R_G$ ,$G/R_G$ is a primitive permutation group on the coset $[G:R]$
+    containing a cyclic group $\langle \overline{d} \rangle$ regular.Then
+    $\mathbb{Z}_2 \cong \langle \overline{d} \rangle \le \overline{G} \le AGL(1,2) $.Thus, $R_G = R$, and so
+    $G = (H \langle c^2 \rangle) \rtimes \langle d \rangle = (H \rtimes \langle c^2 \rangle) \rtimes \langle d \rangle $.
+
+    Now suppose $p \ne 2$. If $d \in G_X$, then $\langle c_1,d \rangle \le G_X$, thus $\langle c_1,d \rangle \le G_X \unlhd \langle c,d \rangle $, and so $c_1 = c^2$ which is contradict with $p \ne 2$.
+    So we have $d \notin G_X$.From $\overline{X} \le AGL(1,p)$, we have $\overline{X} \cong \mathbb{Z}_p \rtimes \mathbb{Z}_r$ with $r | p-1$ .Thus the Sylow-p subgroup of $\overline{X}$ is unique.
+    From $\overline{X} = \overline{G}\langle \overline{c} \rangle$ with the order of $\langle \overline{c} \rangle$ is p, we have $\langle \overline{c} \rangle \unlhd \overline{X}$,
+    and so $\overline{X} = \langle \overline{c} \rangle \rtimes \overline{G}$. Therefore, $\overline{G} \cong \mathbb{Z}_r$ with $r | p-1$.
+    $\overline{G} = \langle \overline{a},\overline{b} \rangle \langle \overline{d} \rangle \cong \mathbb{Z}_r$.
+    If $\langle \overline{a},\overline{b} \rangle = \overline{1}$, then $\overline{G} = \langle \overline{d} \rangle \cong \mathbb{Z}_2$ and $G_X = \langle a,b \rangle \langle c^p \rangle$.
+    Since $G_X \lhd X$, we have $G_X\langle c \rangle = \langle a,b \rangle \langle c \rangle \le X$ which is contradict with G is maximal subgroup of X\@.
+    Now we suppose $\langle \overline{a},\overline{b} \rangle \cong \mathbb{Z}_2$. If $\langle \overline{a}, \overline{b}\rangle \ne \langle \overline{d} \rangle$, then
+    $\langle \overline{a}, \overline{b}\rangle \langle \overline{d} \rangle$ is a Klein group which is contradict with $\overline{G}$ is cyclic.
+    Thus $\langle \overline{a}, \overline{b}\rangle = \langle \overline{d} \rangle$.
+
+    (i) $\overline{b} = \overline{1} $. Since the order of $\langle \overline{a} \rangle = 2$, we have $a^2 \in G_X$ and $2|n$. From $\overline{a} = \overline{d}$, we have $ad = ad^{-1} \in G_X$, and so
+    $G_X = \langle a^2,b,c^p,ad \rangle$.
+
+    (ii) $\overline{a} = 1, \overline{b} \ne 1$. If $\overline{b} \ne \overline{d}$, then $\overline{b} \overline{d}$ is Klein group which is contradict with $\overline{G}$ is cyclic. Thus we have
+    $a \in G_X , bd \in G_X$, and so $G_X = \langle a, c^p, bd \rangle$.
+
+    (iii) $\overline{a} \ne 1, \overline{b} \ne 1$. Since $\overline{G}$ is cyclic, we have$\overline{a} = \overline{b} = \overline{d}$. Therefore $G_X = \langle a^2, c^p ,ad ,bd \rangle$.
+
+    Remain work to classify the exact production of two dihedral group is to determine structure of the situation (i),(ii) and (iii).
+
+
+%    \cite{Hu23032025}
+%    \cite{li2006finite}
+
+    \bibliography{main}
+    \bibliographystyle{plain}
+
+\end{document}

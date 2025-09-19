@@ -1,0 +1,23 @@
+/*
+list := SmallGroups(24,func<G|not IsAbelian(G) and IsSolvable(G) and IsIsomorphic(G,Sym(4))>);
+for G in list do
+    subD6 := [H`subgroup : H in Subgroups(G : OrderEqual := 6) | IsIsomorphic(H`subgroup , DihedralGroup(3))];
+    subD8 := [H`subgroup : H in Subgroups(G : OrderEqual := 8) | IsIsomorphic(H`subgroup , DihedralGroup(4))];
+    for d6 in subD6 do
+        for d8 in subD8 do
+            #(d6 meet d8);
+        end for;
+    end for;
+    //#subD6;
+    //#subD8;
+end for;
+
+
+
+
+*/
+
+G := Sym(4);
+subgroups := Subgroups(G);
+//should has 3 such group(actually 4)
+subD6 := [H`subgroup : H in Subgroups(G : OrderEqual := 6) | IsIsomorphic(H`subgroup , DihedralGroup(3))];

@@ -1,0 +1,134 @@
+//seq is a list with 4 element, which is a list. a^c , a^d, b^c, b^d.
+function SeqToD2nD2m(seq,n,m)
+    if #seq ne 4 then 
+        "invalid seq input";
+    else
+        list1 := seq[1];
+        list_ac := [];
+        for i in list1 do
+            case i:
+                when -4:
+                    Append(~list_ac,d^-1);
+                when -3:
+                    Append(~list_ac,c^-1);
+                when -2:
+                    Append(~list_ac,b^-1);
+                when -1:
+                    Append(~list_ac,a^-1);
+                when 1:
+                    Append(~list_ac,a);
+                when 2:
+                    Append(~list_ac,b);
+                when 3:
+                    Append(~list_ac,c);
+                when 4:
+                    Append(~list_ac,d);
+            end case;
+        end for;
+        
+        list2 := seq[2];
+        list_ad := [];
+        for i in list2 do
+            case i:
+                when -4:
+                    Append(~list_ad,d^-1);
+                when -3:
+                    Append(~list_ad,c^-1);
+                when -2:
+                    Append(~list_ad,b^-1);
+                when -1:
+                    Append(~list_ad,a^-1);
+                when 1:
+                    Append(~list_ad,a);
+                when 2:
+                    Append(~list_ad,b);
+                when 3:
+                    Append(~list_ad,c);
+                when 4:
+                    Append(~list_ad,d);
+            end case;
+        end for;
+        
+        list_3 := seq[3];
+        list_bc := [];
+        for i in list_3 do
+            case i:
+                when -4:
+                    Append(~list_bc,d^-1);
+                when -3:
+                    Append(~list_bc,c^-1);
+                when -2:
+                    Append(~list_bc,b^-1);
+                when -1:
+                    Append(~list_bc,a^-1);
+                when 1:
+                    Append(~list_bc,a);
+                when 2:
+                    Append(~list_bc,b);
+                when 3:
+                    Append(~list_bc,c);
+                when 4:
+                    Append(~list_bc,d);
+            end case;
+        end for;
+        
+        list_4 := seq[4];
+        list_bd := [];
+        for i in list_4 do
+            case i:
+                when -4:
+                    Append(~list_bd,d^-1);
+                when -3:
+                    Append(~list_bd,c^-1);
+                when -2:
+                    Append(~list_bd,b^-1);
+                when -1:
+                    Append(~list_bd,a^-1);
+                when 1:
+                    Append(~list_bd,a);
+                when 2:
+                    Append(~list_bd,b);
+                when 3:
+                    Append(~list_bd,c);
+                when 4:
+                    Append(~list_bd,d);
+            end case;
+        end for;
+        
+        word_ac := &*list_ac;
+        word_ad := &*list_ad;
+        word_bc := &*list_bc;
+        word_bd := &*list_bd;
+        
+        rels := {a^n,b^2,(b*a)^2,c^m,d^2,(d*c)^2};
+        Include(~rels,c^-1*a*c*word_ac^-1);
+        Include(~rels,d^-1*a*d*word_ad^-1);
+        Include(~rels,c^-1*b*c*word_bc^-1);
+        Include(~rels,d^-1*b*d*word_bd^-1);
+        
+        return word_ac,word_ad,word_bc,word_bd;
+        //G<a,b,c,d> := Group<a,b,c,d|
+        //    rels
+        //>;
+    end if;
+end function;
+
+
+G<a,b,c,d> := Group<a,b,c,d|
+            
+        >;
+        
+        
+        
+G<a,b,c,d> := Group<a,b,c,d|
+    a^n=1,
+    b^2=1,
+    c^m=1,
+    d^2=1,
+    a^b = a^(-1),
+    c^d = c^(-1),
+    a^c = a,
+    a^d = a^-1,
+    b^c = b * c^-1 * d * b * d * b * d * b * c^-1 * d * b * c^-1 * d * b * d * b * d * b * c^-1 * d * b,
+    b^d = d * b * d
+>;

@@ -1,0 +1,55 @@
+#list_contain_D2;
+#list_contain_D4;
+#list_contain_D8;
+#list_contain_D16;
+#list_contain_D32;
+#list_contain_D64;
+
+/*  write file */
+filename := "src/Paper/Order256/256containD2_35001_40000.txt";
+F := Open(filename,"w");
+for item in list_contain_D2 do
+    Puts(F, Sprint(item));
+end for;
+Flush(F);
+delete F;
+
+filename := "src/Paper/Order256/256containD4_35001_40000.txt";
+F := Open(filename,"w");
+for item in list_contain_D4 do
+    Puts(F, Sprint(item));
+end for;
+Flush(F);
+delete F;
+
+filename := "src/Paper/Order256/256containD8_35001_40000.txt";
+F := Open(filename,"w");
+for item in list_contain_D8 do
+    Puts(F, Sprint(item));
+end for;
+Flush(F);
+delete F;
+
+filename := "src/Paper/Order256/256containD16_35001_40000.txt";
+F := Open(filename,"w");
+for item in list_contain_D16 do
+    Puts(F, Sprint(item));
+end for;
+Flush(F);
+delete F;
+
+filename := "src/Paper/Order256/256containD32_35001_40000.txt";
+F := Open(filename,"w");
+for item in list_contain_D32 do
+    Puts(F, Sprint(item));
+end for;
+Flush(F);
+delete F;
+
+filename := "src/Paper/Order256/256containD64_35001_40000.txt";
+F := Open(filename,"w");
+for item in list_contain_D64 do
+    Puts(F, Sprint(item));
+end for;
+Flush(F);
+delete F;

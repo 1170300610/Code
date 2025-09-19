@@ -1,0 +1,6 @@
+G<a,b,c>:=Group<a,b,c|a^4=1,a^b=a^(-1),b^2=1,c^3=1,(a^2)^c=b,b^c=a^2*b,c^a=a^2*c^2>;
+G;
+Order(G);
+H:=sub<G|c>;
+K:=Core(G,H);
+Order(K);

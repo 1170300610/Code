@@ -1,0 +1,5 @@
+list := SmallGroups(400,func<G|not IsAbelian(G) and NumberOfGenerators(G) le 4>);
+\\list := SmallGroups(400,func<G|not IsAbelian(G) and IsSolvable(G)>);
+G := list[1];
+H := FPGroup(G);
+H;

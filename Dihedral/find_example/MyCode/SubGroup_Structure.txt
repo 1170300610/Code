@@ -1,0 +1,2 @@
+D4<a,b> :=FPGroup(DihedralGroup(4));
+D2 := sub<D4 | D4.1^2,D4.2>;

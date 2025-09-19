@@ -1,0 +1,124 @@
+smallData_64 := SmallGroups(64);
+
+
+
+i := 332;
+n := 8;
+m := 4;
+
+G := list[i];
+dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+subD2n := [];
+subD2m := [];
+for sub1 in sub_2n do
+    if IsIsoDn(sub1,n) then
+        Append(~subD2n,sub1);
+    end if;
+end for;
+for sub2 in sub_2m do
+    if IsIsoDn(sub2,m) then
+        Append(~subD2m,sub2);
+    end if;
+end for;
+for sub1 in subD2n do
+    for sub2 in subD2m do
+        if #(sub1 meet sub2) eq 1 then
+            Append(~dihedralsForG,[sub1,sub2]);
+        end if;
+    end for;
+end for;
+
+for r in [1 .. #dihedralsForG] do
+    H := dihedralsForG[r][1];
+    K := dihedralsForG[r][2];
+    a,b := DihedralGenerators(H);//find the generators
+    c,d := DihedralGenerators(K);//alert if M contain a reflection ,this d might not be the one in M !!!!!
+
+    //1. index.
+
+    //2. M = <a,b><c1> in X.
+    product_Hc := {};
+    for a in H do
+        for b in sub< G | c > do
+            Include(~product_Hc, a*b);
+        end for;
+    end for;
+    m1List := SubgroupsBetween(G,H,product_Hc);
+    i_M1 := [];
+    for sub in m1List do
+        t := #(sub meet sub<G|c>);//o(c^i)
+        Append(~i_M1,Order(c)/t);
+    end for;
+    
+    smallest_i_M1 := 0;
+    for t in i_M1 do
+        if smallest_i_M1 eq 0 or t lt smallest_i_M1 then
+            smallest_i_M1 := t;
+        end if;
+    end for;
+    
+    //3. M = <a1><c,d> in X.
+    product_aK := {};
+    for e1 in sub< G | a > do
+        for e2 in K do
+            Include(~product_aK, e1*e2);
+        end for;
+    end for;
+    m2List := SubgroupsBetween(G,K,product_aK);
+    i_M2 := [];
+    for sub in m2List do
+        t := #(sub meet sub<G|a>);//o(a^i)
+        Append(~i_M2,Order(a)/t);
+    end for;
+    
+    smallest_i_M2 := 0;
+    index_M := 0;
+    count := 0;
+    for t in i_M2 do
+        count := count + 1;
+        if smallest_i_M2 eq 0 or t lt smallest_i_M2 then
+            smallest_i_M2 := t;
+            index_M := count;
+        end if;
+    end for;
+    
+    i1 := 0;//核中a的系数
+    i2 := 0;//核中b的系数
+    i3 := 0;//核中c的系数
+    i4 := 0;//核中d的系数
+    
+    M := m2List[index_M];
+    M_X := Core(G,M);
+    i1 := Order(a)/(#(M_X meet sub<G|a>));
+    i2 := Order(b)/(#(M_X meet sub<G|b>));
+    i3 := Order(c)/(#(M_X meet sub<G|c>));
+    i4 := Order(d)/(#(M_X meet sub<G|d>));
+    
+    
+    
+    X_hat,proj := quo<G|M_X>;
+    id := 0;
+    count2 := 1;
+    for G2 in smallData_64 do
+        if IsIsomorphic(X_hat,G2) then 
+            id := count2;
+        end if;
+        count2 := count2 + 1;
+    end for;
+
+    
+    
+    
+    
+    cd_Corefree := 0;
+    if #(Core(G,K)) eq 1 then
+        cd_Corefree := 1;
+    end if;
+    
+    //print
+    row := [i,r,smallest_i_M2,i1,i2,i3,i4,cd_Corefree,id];
+    printList(row);
+end for;
+

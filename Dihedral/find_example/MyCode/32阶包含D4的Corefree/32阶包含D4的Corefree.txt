@@ -1,0 +1,29 @@
+list := SmallGroups(32);
+n := 4;
+D4 := DihedralGroup(4);
+
+for i in [1 .. #list] do
+    G := list[i];
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    subD2n := [];
+    for sub1 in sub_2n do
+        if IsIsomorphic(sub1,D4) then
+            Append(~subD2n,sub1);
+        end if;
+    end for;
+    
+    count := 0;
+    for sub in subD2n do
+        core := Core(G,sub);
+        if #core eq 1 then 
+            count := i;
+        end if;
+        [i,#core];
+    end for;
+    
+    //count;
+end for;
+
+
+count;
+

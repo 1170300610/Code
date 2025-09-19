@@ -1,0 +1,15 @@
+//D8_D4_indexsOfExactProduct2
+
+
+/* read indexsOfExactProduct2 */
+filename := "src/Paper/D8_D8_indexsOfExactProduct2.txt";
+F := Open(filename,"r");
+indexsOfExactProduct2 := [];
+for i in [1 .. 60000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    Append(~indexsOfExactProduct2,StringToInteger(line));
+end for;
+delete F;

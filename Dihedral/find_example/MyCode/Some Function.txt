@@ -1,0 +1,17 @@
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "error";
+end function;
+
+function EltbyGenerators(FQ_rewrite,iso,x)
+    return Eltseq(x @@ iso);
+end function;

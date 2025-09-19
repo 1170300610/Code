@@ -1,0 +1,41 @@
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;

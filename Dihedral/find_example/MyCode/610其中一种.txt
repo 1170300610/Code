@@ -1,0 +1,37 @@
+n := 6;
+m := 10;
+i_1 := 0;
+i_2 := 0;
+i_3 := 0;
+i_4 := 0;
+j_1 := 0;
+j_2 := 1;
+j_3 := 1;
+j_4 := 1;
+k_1 := 0;
+k_2 := 4;
+k_3 := 2;
+k_4 := 0;
+t_1 := 1;
+t_2 := 0;
+t_3 := 0;
+t_4 := 0;
+
+G<a,b,c,d> := Group<a,b,c,d|
+a^n=1,
+b^2=1,
+c^m=1,
+d^2=1,
+a^b = a^(-1),
+c^d = c^(-1),
+a^c = a^i_1 * b^j_1 * c^k_1 * d^t_1,
+a^d = a^i_2 * b^j_2 * c^k_2 * d^t_2,
+b^c = a^i_3 * b^j_3 * c^k_3 * d^t_3,
+b^d = a^i_4 * b^j_4 * c^k_4 * d^t_4
+>;
+if Order(G) eq 4 * n * m then
+    [i_1,j_1,k_1,t_1,i_2,j_2,k_2,t_2,i_3,j_3,k_3,t_3,i_4,j_4,k_4,t_4];
+    M_ab := sub<G|a,b>;
+    M_cd := sub<G|c,d>;
+    [Order(Core(G,M_ab)),Order(Core(G,M_cd))];
+end if;

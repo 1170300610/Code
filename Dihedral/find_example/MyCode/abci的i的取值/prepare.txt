@@ -1,0 +1,195 @@
+n := 4;
+m := 16;
+
+list := SmallGroups(4*n*m,func<G|not IsAbelian(G) and IsSolvable(G)>);
+
+
+
+function SubgroupsBetween(G,L,U)
+    list := [ N`subgroup : N in Subgroups(G)];
+    L_set := {a : a in L };
+    U_set := {a : a in U };
+    list_return := [];
+    for P in list do
+        P_conjugates := Conjugates(G,P);
+        for M in P_conjugates do 
+            M_set := {a : a in M };
+            if L_set subset M_set and M_set subset U_set then
+                Append(~list_return,M);
+            end if;
+        end for;
+    end for;
+    return list_return;
+end function;
+
+function NontrivialMinimalNormalSubgroups(G)
+    normSubs := NormalSubgroups(G);
+    nonTrivialNormSubs := [ N`subgroup : N in normSubs | #N`subgroup gt 1 and #N`subgroup lt #G ];
+
+    // 寻找极小正规子群：无其他非平凡正规子群严格包含于其中
+    minimalNormals := [];
+    for N in nonTrivialNormSubs do
+        isMinimal := true;
+        for M in nonTrivialNormSubs do
+            if M ne N and M subset N then
+                isMinimal := false;
+                break;
+            end if;
+        end for;
+        if isMinimal then
+            Append(~minimalNormals, N);
+        end if;
+    end for;
+    return minimalNormals;
+end function;
+
+function NontrivialAbelianMinimalNormalSubgroups(G)
+    minimalAbelianNormals := [];
+    minimalNormals := NontrivialMinimalNormalSubgroups(G);
+    for N in minimalNormals do
+        if IsAbelian(N) then
+            Append(~minimalAbelianNormals,N);
+        end if;
+    end for;
+    return minimalAbelianNormals;
+end function;
+
+procedure printList(row)
+    printf "[";
+    printf "%4o", row[1];
+    for j := 2 to #row do
+        printf ",%3o", row[j];
+    end for;
+    printf " ]\n";
+end procedure;
+
+/*  H is the lower bound and H should be group.
+    Return a list which element is group */
+function MaximalSubgroupContaining(G,H)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        if H subset M then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/*  L is the lower bound,U is the upper bound. L and U can be set.
+    Return a list which element is group */
+function MaximalSubgroupBetween(G,L,U)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        M_set := {a : a in M };
+        L_set := {a : a in L };
+        U_set := {a : a in U };
+        if L_set subset M_set and M_set subset U_set then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+function isHKsubGroup(G, H, K)
+    I := H meet K;
+    S := sub<G | H,K>;
+    if Order(S) eq (Order(H) * Order(K))/Order(I) then
+        return true;
+    end if;
+    return false;
+end function;
+
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    if CountElementsOfOrder(H, n) ne EulerPhi(n) then
+        return false;
+    end if;
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;
+
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "logical error";
+end function;
+
+
+
+
+
+/*  H is the lower bound and H should be group.
+    Return a list which element is group */
+function MaximalSubgroupContaining(G,H)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        if H subset M then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/*  L is the lower bound,U is the upper bound. L and U can be set.
+    Return a list which element is group */
+function MaximalSubgroupBetween(G,L,U)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        M_set := {a : a in M };
+        L_set := {a : a in L };
+        U_set := {a : a in U };
+        if L_set subset M_set and M_set subset U_set then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+

@@ -1,0 +1,38 @@
+/*  H is the lower bound and H should be group.
+    Return a list which element is group */
+function MaximalSubgroupContaining(G,H)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        if H subset M then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/*  L is the lower bound,U is the upper bound. L and U can be set.
+    Return a list which element is group */
+function MaximalSubgroupBetween(G,L,U)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        M_set := {a : a in M };
+        L_set := {a : a in L };
+        U_set := {a : a in U };
+        if L_set subset M_set and M_set subset U_set then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+
+
+//demo
+
+//H = <a,b>.
+maximalList := MaximalSubgroupContaining(G,H);
+//between <a,b>  and  <a,b><c>
+maximalList := MaximalSubgroupBetween(G,H,SubgroupProduct(H,sub<K | c1>));
+//whether H/<c1>_X is normal in HK/<c1>_X

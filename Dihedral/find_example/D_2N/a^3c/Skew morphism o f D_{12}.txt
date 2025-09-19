@@ -1,0 +1,35 @@
+p:=6;
+for n:=8 to 12 do
+for i:=0 to p-1 do
+for j:=0 to 1 do
+for k:=0 to n-1 do
+for s:=0 to p-1 do
+for t:=0 to 1 do
+for m:=0 to n-1 do
+G<a,b,c>:=Group<a,b,c|a^(p)=1,a^b=a^(-1),b^2=1,c^n=1,a^c=a^i*b^j*c^k,b^c=a^s*b^t*c^m>;
+z:=Order(G);
+if(z eq 2*p*n) then
+H:=sub<G|c>;
+y:=Order(H);
+if(y eq n) then
+M:=sub<G|a,b>;
+v:=Order(M);
+if(v eq 2*p) then
+K:=Core(G,H);
+x:=Order(K);
+E:=Core(G,M);
+e:=Order(E);
+if(x eq 1 and e eq 2) then 
+[i,j,k,s,t,m,n];
+e;
+end if;
+end if;
+end if;
+end if;
+end for;
+end for;
+end for;
+end for;
+end for;
+end for;
+end for;

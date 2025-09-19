@@ -1,0 +1,78 @@
+
+/* read D2 */
+filename := "src/Paper/Order256/total/256containD2_total.txt";
+F := Open(filename,"r");
+indexs_D2 := [];
+for i in [1 .. 60000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    Append(~indexs_D2,StringToInteger(line));
+end for;
+delete F;
+
+/* read D4 */
+filename := "src/Paper/Order256/total/256containD4_total.txt";
+F := Open(filename,"r");
+indexs_D4 := [];
+for i in [1 .. 60000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    Append(~indexs_D4,StringToInteger(line));
+end for;
+delete F;
+
+/* read D8 */
+filename := "src/Paper/Order256/total/256containD8_total.txt";
+F := Open(filename,"r");
+indexs_D8 := [];
+for i in [1 .. 60000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    Append(~indexs_D8,StringToInteger(line));
+end for;
+delete F;
+
+/* read D16 */
+filename := "src/Paper/Order256/total/256containD16_total.txt";
+F := Open(filename,"r");
+indexs_D16 := [];
+for i in [1 .. 60000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    Append(~indexs_D16,StringToInteger(line));
+end for;
+delete F;
+
+/* read D32 */
+filename := "src/Paper/Order256/total/256containD32_total.txt";
+F := Open(filename,"r");
+indexs_D32 := [];
+for i in [1 .. 60000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    Append(~indexs_D32,StringToInteger(line));
+end for;
+delete F;
+
+/* read D64 */
+filename := "src/Paper/Order256/total/256containD64_total.txt";
+F := Open(filename,"r");
+indexs_D64 := [];
+for i in [1 .. 60000] do
+    line := Gets(F);
+    if IsEof(line) then
+        break;
+    end if;
+    Append(~indexs_D64,StringToInteger(line));
+end for;
+delete F;

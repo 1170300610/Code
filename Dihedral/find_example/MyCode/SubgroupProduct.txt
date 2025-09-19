@@ -1,0 +1,11 @@
+//sub1,sub2 should be subgroup of the same group G.
+//return type is SetEnum
+function SubgroupProduct(sub1,sub2)
+    product := {};
+    for a in sub1 do
+        for b in sub2 do
+            Include(~product, a*b);
+        end for;
+    end for;
+    return product;
+end function;

@@ -1,0 +1,10 @@
+p:=8;
+G<a,b,c>:=Group<a,b,c|a^(p)=1,a^b=a^(-1),b^2=1,c^8=1,a^c=a^1*b^1*c^2,b^c=a^2*b^1*c^4>;
+H:=sub<G|a,b>;
+Order(H);
+K:=Core(G,H);
+Order(K);
+H:=sub<G|a,b,c^4>;
+Order(H);
+K:=Core(G,H);
+Order(K);

@@ -1,0 +1,9 @@
+n:=4;
+G<a,b>:=Group<a,b|a^(2^n)=1,b^2=1,a^b=a^(-1)>;
+Order(G);
+H:=pQuotient(G,2,100);
+#H;
+H;
+A:=AutomorphismGroup(H);
+A;
+#A;

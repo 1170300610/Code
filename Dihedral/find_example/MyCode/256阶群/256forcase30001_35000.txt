@@ -1,0 +1,154 @@
+groupSize := 256;
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then//p-group is always solvable
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    if CountElementsOfOrder(H, n) ne EulerPhi(n) then
+        return false;
+    end if;
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;
+
+
+list_temp := SmallGroups(groupSize,func<G|not IsAbelian(G) and IsSolvable(G)>);
+/* use the essential */
+list := [];
+for i in [30001 .. 35000] do 
+    Append(~list,list_temp[i]);
+end for;
+
+delete list_temp;//free memory
+
+//list2 is a list of group which contains at least one dihedral subgroup
+//find all group G which contains D2n and D2m. Save it in the list2.
+globalStart := Realtime();
+list2 := [];
+list_contain_D2 := [];//it is easy to calculate subgroup D32. 
+list_contain_D4 := [];
+list_contain_D8 := [];
+list_contain_D16 := [];
+list_contain_D32 := [];
+list_contain_D64 := [];
+count := 30001;
+bias := 30000;//add the start bias
+for i in [1 .. #list] do
+    G := list[i];
+    count;
+    count +:= 1;
+    potential_subgroupsList_D2 := [K`subgroup : K in Subgroups(G : OrderEqual := 4) | not IsCyclic(K`subgroup)];
+    potential_subgroupsList_D4 := [K`subgroup : K in Subgroups(G : OrderEqual := 8) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    potential_subgroupsList_D8 := [K`subgroup : K in Subgroups(G : OrderEqual := 16) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    potential_subgroupsList_D16 := [K`subgroup : K in Subgroups(G : OrderEqual := 32) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    potential_subgroupsList_D32 := [K`subgroup : K in Subgroups(G : OrderEqual := 64) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    potential_subgroupsList_D64 := [K`subgroup : K in Subgroups(G : OrderEqual := 128) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    flag_D2 := 0;
+    flag_D4 := 0;
+    flag_D8 := 0;
+    flag_D16 := 0;
+    flag_D32 := 0;
+    flag_D64 := 0;
+    for H in potential_subgroupsList_D2 do
+        flag_D2 := 1;//#potential_subgroupsList_D2 ne 0, then exist.
+    end for;
+    if flag_D2 eq 1 then
+        for H in potential_subgroupsList_D4 do
+            if(IsIsoDn(H,4)) then 
+                flag_D4 := 1;
+                break;
+            end if;
+        end for;
+    end if;
+    if flag_D4 eq 1 then//if D8 exist then D4 exist. If D4 not exist then D8 not exist.
+        for H in potential_subgroupsList_D8 do
+            if(IsIsoDn(H,8)) then 
+                flag_D8 := 1;
+                break;
+            end if;
+        end for;
+    end if;
+    if flag_D8 eq 1 then//if D8 exist then D4 exist. If D4 not exist then D8 not exist.
+        for H in potential_subgroupsList_D16 do
+            if(IsIsoDn(H,16)) then 
+                flag_D16 := 1;
+                break;
+            end if;
+        end for;
+    end if;
+    if flag_D16 eq 1 then//if D8 exist then D4 exist. If D4 not exist then D8 not exist.
+        for H in potential_subgroupsList_D32 do
+            if(IsIsoDn(H,32)) then 
+                flag_D32 := 1;
+                break;
+            end if;
+        end for;
+    end if;
+    if flag_D32 eq 1 then//if D8 exist then D4 exist. If D4 not exist then D8 not exist.
+        for H in potential_subgroupsList_D64 do
+            if(IsIsoDn(H,64)) then 
+                flag_D64 := 1;
+                break;
+            end if;
+        end for;
+    end if;
+    
+    //save the index of G of the list.
+    
+    actual_index := i + bias;
+    
+    if flag_D2 eq 1 then
+        Append(~list_contain_D2,actual_index);
+    end if;
+    if flag_D4 eq 1 then
+        Append(~list_contain_D4,actual_index);
+    end if;
+    if flag_D8 eq 1 then
+        Append(~list_contain_D8,actual_index);
+    end if;
+    if flag_D16 eq 1 then
+        Append(~list_contain_D16,actual_index);
+    end if;
+    if flag_D32 eq 1 then
+        Append(~list_contain_D32,actual_index);
+    end if;
+    if flag_D64 eq 1 then
+        Append(~list_contain_D64,actual_index);
+    end if;
+end for;
+totalElapsed := Realtime(globalStart);
+printf "\nCounting list2 Total execution time: %o seconds\n", totalElapsed;
+

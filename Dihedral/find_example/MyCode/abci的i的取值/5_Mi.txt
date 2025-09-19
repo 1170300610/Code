@@ -1,0 +1,68 @@
+
+//given a list2[] and seqs[][]
+
+for i in indexsOfExactProduct2 do
+    G := list[i];
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    subD2n := [];
+    subD2m := [];
+    for sub1 in sub_2n do
+        if IsIsoDn(sub1,n) then
+            Append(~subD2n,sub1);
+        end if;
+    end for;
+    for sub2 in sub_2m do
+        if IsIsoDn(sub2,m) then
+            Append(~subD2m,sub2);
+        end if;
+    end for;
+    for sub1 in subD2n do
+        for sub2 in subD2m do
+            if #(sub1 meet sub2) eq 1 then
+                Append(~dihedralsForG,[sub1,sub2]);
+                break sub1;
+            end if;
+        end for;
+    end for;
+    H := dihedralsForG[1][1];
+    K := dihedralsForG[1][2];
+    a,b := DihedralGenerators(H);//find the generators
+    c,d := DihedralGenerators(K);//alert if M contain a reflection ,this d might not be the one in M !!!!!
+
+    //1. index.
+
+    //2. M = <a,b><c1> in X.
+    product_Hc := {};
+    for a in H do
+        for b in sub< G | c > do
+            Include(~product_Hc, a*b);
+        end for;
+    end for;
+    m1List := SubgroupsBetween(G,H,product_Hc);
+    i_M1 := [];
+    for sub in m1List do
+        t := #(sub meet sub<G|c>);//o(c^i)
+        Append(~i_M1,Order(c)/t);
+    end for;
+    
+    //3. M = <a1><c,d> in X.
+    product_aK := {};
+    for e1 in sub< G | a > do
+        for e2 in K do
+            Include(~product_aK, e1*e2);
+        end for;
+    end for;
+    m2List := SubgroupsBetween(G,K,product_aK);
+    i_M2 := [];
+    for sub in m2List do
+        t := #(sub meet sub<G|a>);//o(a^i)
+        Append(~i_M2,Order(a)/t);
+    end for;
+    
+    //print
+    i;
+    i_M1;
+    i_M2;
+end for;

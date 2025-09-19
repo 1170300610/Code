@@ -1,0 +1,104 @@
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "logical error";
+end function;
+
+function EltbyGenerators(iso,x)
+    w := x @@ iso;
+    //w;//for debug.
+    return Eltseq(w);
+end function;
+
+
+
+n := 4;
+m := 4;
+list := SmallGroups(4*n*m,func<G|not IsAbelian(G) and IsSolvable(G)>);
+
+
+//list2 is a list of group which contains at least one dihedral subgroup
+//find all group G which contains D2n and D2m. Save it in the list2.
+list2 := [];
+for G in list do
+    subgroupsList_H := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    subgroupsList_K := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    flag_1 := 0;
+    flag_2 := 0;
+    for H in subgroupsList_H do
+        if(IsIsomorphic(H,DihedralGroup(n))) then
+            flag_1 := 1;
+            break;
+        end if;
+    end for;
+    for K in subgroupsList_K do
+        if(IsIsomorphic(K,DihedralGroup(m))) then
+            flag_2 := 1;
+            break;
+        end if;
+    end for;
+    if flag_1 eq 1 and flag_2 eq 1 then
+        Append(~list2,G);
+    end if;
+end for;
+
+
+
+//seqs is a list for the result
+count := 0;
+seqs := [];
+indexsOfExactProduct := [];
+for G in list2 do 
+    count := count +1;
+    //count;//for debug.
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    for sub1 in sub_2n do
+        for sub2 in sub_2m do
+            if(IsIsomorphic(sub1,DihedralGroup(n)) and (IsIsomorphic(sub2,DihedralGroup(m)))) then
+                product := {};
+                for a in sub1 do
+                    for b in sub2 do
+                        Include(~product, a*b);
+                    end for;
+                end for;
+                if #product eq 2*2*n*m then
+                    Append(~dihedralsForG,[sub1,sub2]);
+                    break sub1;//find the first one ,then break. You can all cancel this line to find all.
+                end if;
+            end if;
+        end for;
+    end for;
+    
+    //deal with G with H and K already found.
+    if #dihedralsForG ne 0 then
+        /*
+        H := dihedralsForG[1][1];
+        K := dihedralsForG[1][2];
+        a1,b1 := DihedralGenerators(H);//find the generators
+        c1,d1 := DihedralGenerators(K);
+        
+        //construct free group for G
+        
+        F<a,b,c,d> := FreeGroup(4);
+        rels := {a^n,b^2,(b*a)^2,c^m,d^2,(d*c)^2};
+        FQ<x,y,z,w>, proj := quo<F | rels>;
+        FQ_rewrite := RWSGroup(FQ);//This step can simplify the seq result.
+        iso := hom<FQ_rewrite -> G | [a1,b1,c1,d1]>;
+        Append(~seqs,[EltbyGenerators(iso,a1^c1),EltbyGenerators(iso,a1^d1),
+        EltbyGenerators(iso,b1^c1),EltbyGenerators(iso,b1^d1)]);
+        */
+        Append(~indexsOfExactProduct,count);
+    else
+        Append(~seqs,[]);//prevent G cannot be factorized by the dihedral group
+    end if;
+end for;

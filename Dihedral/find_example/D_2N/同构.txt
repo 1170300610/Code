@@ -1,0 +1,81 @@
+p:=2^3;
+
+S:=[ 1, 1, 2, 6, 1, 4, 8 ];
+S;
+G<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+X:=SolvableQuotient(G);
+
+
+
+
+S:=[ 1, 1, 6, 2, 1, 4, 8 ];
+S;
+H<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+Y:=SolvableQuotient(H);
+
+IsIsomorphic(Y,X);
+
+S:=[ 2, 1, 2, 1, 0, 6, 8 ];
+S;
+H<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+Y:=SolvableQuotient(H);
+
+IsIsomorphic(Y,X);
+
+
+S:=[ 2, 1, 6, 5, 0, 2, 8 ];
+S;
+H<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+Y:=SolvableQuotient(H);
+
+IsIsomorphic(Y,X);
+S:=[ 5, 1, 2, 6, 1, 4, 8 ];
+S;
+H<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+Y:=SolvableQuotient(H);
+
+IsIsomorphic(Y,X);
+S:=[ 5, 1, 6, 2, 1, 4, 8 ];
+S;
+H<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+Y:=SolvableQuotient(H);
+
+IsIsomorphic(Y,X);
+
+
+S:=[ 6, 1, 2, 5, 0, 6, 8 ];
+S;
+H<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+Y:=SolvableQuotient(H);
+
+IsIsomorphic(Y,X);
+S:=[ 6, 1, 6, 1, 0, 2, 8 ];
+S;
+H<a,b,c>:=Group<a,b,c|a^p=1,
+a^b=a^(-1),b^2=1,c^(S[7])=1,
+a^c=a^(S[1])*b^(S[2])*c^(S[3]),
+b^c=a^(S[4])*b^(S[5])*c^(S[6])>;
+Y:=SolvableQuotient(H);
+
+IsIsomorphic(Y,X);

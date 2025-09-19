@@ -1,0 +1,16 @@
+G := list[137];
+r := 1;
+
+X_hat,proj := quo<G|M_X>;
+
+smallData_64 := SmallGroups(64);
+
+index := 0;
+count := 1;
+for G2 in smallData_64 do
+    if IsIsomorphic(X_hat,G2) then 
+        index := count;
+    end if;
+    count := count + 1;
+end for;
+index;

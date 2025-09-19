@@ -1,0 +1,282 @@
+n := 4;
+m := 4;
+
+function listElementsOfOrder(G, k)
+    ret := [];
+    for g in G do
+        if Order(g) eq k then
+            Append(~ret,g);
+        end if;
+    end for;
+    return ret;
+end function;
+
+function isHKsubGroup(G, H, K)
+    I := H meet K;
+    S := sub<G | H,K>;
+    if Order(S) eq (Order(H) * Order(K))/Order(I) then
+        return true;
+    end if;
+    return false;
+end function;
+
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    if CountElementsOfOrder(H, n) ne EulerPhi(n) then
+        return false;
+    end if;
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;
+
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "logical error";
+end function;
+
+
+list := SmallGroups(4*n*m,func<G|not IsAbelian(G) and IsSolvable(G)>);
+
+
+//list2 is a list of group which contains at least one dihedral subgroup
+//find all group G which contains D2n and D2m. Save it in the list2.
+globalStart := Realtime();
+list2 := [];
+count := 1;
+for i in [1 .. #list] do
+    G := list[i];
+    //count;
+    count +:= 1;
+    subgroupsList_H := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    subgroupsList_K := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    flag_1 := 0;
+    flag_2 := 0;
+    for H in subgroupsList_H do
+        if(IsIsoDn(H,n)) then
+            flag_1 := 1;
+            break;
+        end if;
+    end for;
+    if flag_1 eq 0 then 
+        continue i;
+    end if;
+    for K in subgroupsList_K do
+        if(IsIsoDn(K,m)) then
+            flag_2 := 1;
+            break;
+        end if;
+    end for;
+    if flag_1 eq 1 and flag_2 eq 1 then
+        Append(~list2,i);
+    end if;
+end for;
+totalElapsed := Realtime(globalStart);
+printf "\nCounting list2 Total execution time: %o seconds\n", totalElapsed;
+
+
+
+//seqs is a list for the result
+globalStart := Realtime();
+count := 0;
+seqs := [];
+indexsOfExactProduct := [];//save index of list2
+indexsOfExactProduct2 := [];//save index of list
+for index in list2 do 
+    G := list[index];
+    count := count +1;
+    //count;//for debug.
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    subD2n := [];
+    subD2m := [];
+    potential_combine := [];
+    potential_sub1 := {};
+    potential_sub2 := {};
+    for i in [1 .. #sub_2n] do
+        for j in [1 .. #sub_2m] do 
+            if #(sub_2n[i] meet sub_2m[j]) eq 1 then
+                Append(~potential_combine,[i,j]);
+                Include(~potential_sub1,i);
+                Include(~potential_sub2,j);
+            end if;
+        end for;
+    end for;
+    
+    for i in potential_sub1 do
+        if not IsIsoDn(sub_2n[i],n) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][1] eq i then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for j in potential_sub2 do
+        if not IsIsoDn(sub_2m[j],m) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][2] eq j then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for combine in potential_combine do 
+        Append(~dihedralsForG,[sub_2n[combine[1]],sub_2m[combine[2]]]);
+    end for;
+    
+    
+    //deal with G with H and K already found.
+    if #dihedralsForG ne 0 then
+        Append(~indexsOfExactProduct,count);
+        Append(~indexsOfExactProduct2,index);
+    end if;
+end for;
+totalElapsed := Realtime(globalStart);
+printf "\nCounting indexsOfExactProduct total execution time: %o seconds\n", totalElapsed;
+
+
+//given a list2[] and seqs[][]
+//given a list indexsOfExactProduct element is index of which is exact product of dihedral Group.
+
+/*  H is the lower bound and H should be group.
+    Return a list which element is group */
+function MaximalSubgroupContaining(G,H)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        if H subset M then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/*  L is the lower bound,U is the upper bound. L and U can be set.
+    Return a list which element is group */
+function MaximalSubgroupBetween(G,L,U)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        M_set := {a : a in M };
+        L_set := {a : a in L };
+        U_set := {a : a in U };
+        if L_set subset M_set and M_set subset U_set then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+
+
+for i in indexsOfExactProduct do
+    index := list2[i];
+    G := list[index];
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    subD2n := [];
+    subD2m := [];
+    for sub1 in sub_2n do
+        if IsIsomorphic(sub1,DihedralGroup(n)) then
+            Append(~subD2n,sub1);
+        end if;
+    end for;
+    for sub2 in sub_2m do
+        if IsIsomorphic(sub2,DihedralGroup(m)) then
+            Append(~subD2m,sub2);
+        end if;
+    end for;
+    for sub1 in subD2n do
+        for sub2 in subD2m do
+            if #(sub1 meet sub2) eq 1 then
+                Append(~dihedralsForG,[sub1,sub2]);
+                break sub1;
+            end if;
+        end for;
+    end for;
+    
+
+    H := dihedralsForG[1][1];
+    K := dihedralsForG[1][2];
+    a,b := DihedralGenerators(H);//find the generators
+    c,d := DihedralGenerators(K);//alert if M contain a reflection ,this d might not be the one in M !!!!!
+
+    b_list := listElementsOfOrder(H,2);
+    d_list := listElementsOfOrder(K,2);
+    
+    for b in b_list do
+        for d in d_list do
+            flag_fake_b := 0;
+            flag_fake_d := 0;
+            if b in sub<G |a> then 
+                flag_fake_b := 1;
+            end if;
+            if d in sub<G| c> then
+                flag_fake_d := 1;
+            end if;
+            flag_bd_normal := 0;
+            if IsNormal(G,sub<G | b*d>) then
+                flag_bd_normal := 1;
+            end if;
+            
+            row := [index, flag_bd_normal, flag_fake_b,flag_fake_d];
+            printf "[";
+            printf "%4o", row[1];
+            for j := 2 to #row do
+                printf ",%3o", row[j];
+            end for;
+            printf " ]\n";
+            
+        end for;
+    end for;
+    
+end for;

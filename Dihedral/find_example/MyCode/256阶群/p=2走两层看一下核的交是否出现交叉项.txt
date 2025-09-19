@@ -1,0 +1,244 @@
+/* construct indexsOfExactProduct2 and list*/
+
+//n := 8;m := 8;
+//indexsOfExactProduct2 := [717,720,725];//D8_D8
+
+n := 4;m := 16;
+indexsOfExactProduct2 := [5083,5085];//D4_D16
+
+
+list := SmallGroups(4*n*m,func<G|not IsAbelian(G) and IsSolvable(G)>);
+
+/* end construct indexsOfExactProduct2 */
+
+
+
+/* function start */
+procedure printList(row)
+    printf "[";
+    printf "%4o", row[1];
+    for j := 2 to #row do
+        printf ",%3o", row[j];
+    end for;
+    printf " ]\n";
+end procedure;
+
+function isHKsubGroup(G, H, K)
+    I := H meet K;
+    S := sub<G | H,K>;
+    if Order(S) eq (Order(H) * Order(K))/Order(I) then
+        return true;
+    end if;
+    return false;
+end function;
+
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    if CountElementsOfOrder(H, n) ne EulerPhi(n) then
+        return false;
+    end if;
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;
+
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "logical error";
+end function;
+
+
+
+/*  H is the lower bound and H should be group.
+    Return a list which element is group */
+function MaximalSubgroupContaining(G,H)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        if H subset M then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/*  L is the lower bound,U is the upper bound. L and U can be set.
+    Return a list which element is group */
+function MaximalSubgroupBetween(G,L,U)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        M_set := {a : a in M };
+        L_set := {a : a in L };
+        U_set := {a : a in U };
+        if L_set subset M_set and M_set subset U_set then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/* function end */
+
+
+
+
+for i in indexsOfExactProduct2 do
+    G := list[i];
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    subD2n := [];
+    subD2m := [];
+    for sub1 in sub_2n do
+        if IsIsoDn(sub1,n) then
+            Append(~subD2n,sub1);
+        end if;
+    end for;
+    for sub2 in sub_2m do
+        if IsIsoDn(sub2,m) then
+            Append(~subD2m,sub2);
+        end if;
+    end for;
+    for sub1 in subD2n do
+        for sub2 in subD2m do
+            if #(sub1 meet sub2) eq 1 then
+                Append(~dihedralsForG,[sub1,sub2]);
+                break sub1;
+            end if;
+        end for;
+    end for;
+    
+
+    H := dihedralsForG[1][1];
+    K := dihedralsForG[1][2];
+    a,b := DihedralGenerators(H);//find the generators
+    c,d := DihedralGenerators(K);
+    
+    M_l := MaximalSubgroupContaining(G,H);
+    M_r := MaximalSubgroupContaining(G,K);
+    flag1 := 0;
+    flag2 := 0;
+    flag3 := 0;
+    flag4 := 0;
+    
+    //flag1 and flag2 
+    maximalList1 := [];
+    maximalList2 := [];
+    for M in M_l do
+        //flag1
+        maximalList1 := MaximalSubgroupContaining(M,H);
+        
+        //flag2
+        if sub< K | c > subset M then
+            "error1";
+        elif not (sub< K | d > subset M) and not (sub< K | c*d > subset M) then
+            "error2";
+        elif sub< K | d > subset M then
+            maximalList2 := MaximalSubgroupContaining(M,sub< G | c^2,d >);//TODO
+        elif sub< K | c*d > subset M then
+            maximalList2 := MaximalSubgroupContaining(M,sub< G | c^2,c*d >);//TODO
+        end if;
+    end for;
+    
+    
+    //flag3 and flag4 
+    maximalList3 := [];
+    maximalList4 := [];
+    for M in M_r do
+        //flag3
+        maximalList3 := MaximalSubgroupContaining(M,K);
+        
+        //flag4
+        if sub< H | a > subset M then
+            "error3";
+        elif not (sub< H | b > subset M) and not (sub< H | a*b > subset M) then
+            "error4";
+        elif sub< H | b > subset M then
+            maximalList4 := MaximalSubgroupContaining(M,sub< H | a^2,b >);//TODO DONE
+        elif sub< H | a*b > subset M then//TODO DONE
+            maximalList4 := MaximalSubgroupContaining(M,sub< H | a^2,a*b >);//TODO DONE
+        end if;
+    end for;
+    
+    
+    //print
+    for T1 in maximalList1 do
+        for T2 in maximalList2 do
+            printList([i, 12, #(Core(G,T1) meet Core(G,T2))]);
+        end for;
+    end for;
+    for T1 in maximalList1 do
+        for T2 in maximalList3 do
+            printList([i, 13, #(Core(G,T1) meet Core(G,T2))]);
+        end for;
+    end for;
+    for T1 in maximalList1 do
+        for T2 in maximalList4 do
+            printList([i, 14, #(Core(G,T1) meet Core(G,T2))]);
+        end for;
+    end for;
+    for T1 in maximalList2 do
+        for T2 in maximalList3 do
+            printList([i, 23, #(Core(G,T1) meet Core(G,T2))]);
+        end for;
+    end for;
+    for T1 in maximalList2 do
+        for T2 in maximalList4 do
+            printList([i, 24, #(Core(G,T1) meet Core(G,T2))]);
+        end for;
+    end for;
+    for T1 in maximalList3 do
+        for T2 in maximalList4 do
+            printList([i, 34, #(Core(G,T1) meet Core(G,T2))]);
+        end for;
+    end for;
+    
+    
+    row := [i , flag1, flag2, flag3, flag4];
+    printList(row);
+end for;

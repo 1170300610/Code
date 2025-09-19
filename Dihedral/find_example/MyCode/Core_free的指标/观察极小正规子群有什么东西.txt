@@ -1,0 +1,76 @@
+G := list[464];
+dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+subD2n := [];
+subD2m := [];
+for sub1 in sub_2n do
+    if IsIsoDn(sub1,n) then
+        Append(~subD2n,sub1);
+    end if;
+end for;
+for sub2 in sub_2m do
+    if IsIsoDn(sub2,m) then
+        Append(~subD2m,sub2);
+    end if;
+end for;
+for sub1 in subD2n do
+    for sub2 in subD2m do
+        if #(sub1 meet sub2) eq 1 then
+            Append(~dihedralsForG,[sub1,sub2]);
+            break sub1;
+        end if;
+    end for;
+end for;
+H := dihedralsForG[1][1];
+K := dihedralsForG[1][2];
+a,b := DihedralGenerators(H);//find the generators
+c,d := DihedralGenerators(K);//alert if M contain a reflection ,this d might not be the one in M !!!!!
+
+
+
+
+abelianNormals := NontrivialAbelianMinimalNormalSubgroups(G);
+#abelianNormals;
+N := abelianNormals[1];
+#(sub<G|a,b> meet N);
+#(sub<G|c,d> meet N);
+#(sub<G|a> meet N);
+#(sub<G|c> meet N);
+a^4 in N;
+
+N3 := abelianNormals[3];
+#(sub<G|a,b> meet N3);
+#(sub<G|c,d> meet N3);
+#(sub<G|a> meet N3);
+#(sub<G|c> meet N3);
+
+K3 := Core(G,sub<G|N3,c,d>);
+#(sub<G|a,b> meet K3);
+#(sub<G|c,d> meet K3);
+#(sub<G|a> meet K3);
+#(sub<G|c> meet K3);
+
+
+
+//有交叉项
+#(sub<G|b,c> meet N);
+#(sub<G|a,c> meet N);
+#(sub<G|a,d> meet N);
+#(sub<G|b,d> meet N);
+
+
+K := Core(G,sub<G|N,c,d>);
+#(sub<G|a,b> meet K);
+#(sub<G|c,d> meet K);
+#(sub<G|a> meet K);
+#(sub<G|c> meet K);
+sub<G|a^4,c^4> eq K;
+
+//<a,b> Core-free
+K := Core(G,sub<G|N,a,b>);
+#(sub<G|a,b> meet K);
+#(sub<G|c,d> meet K);
+#(sub<G|a> meet K);
+#(sub<G|c> meet K);
+sub<G|a^4,c^4> eq K;

@@ -1,0 +1,389 @@
+/* load file
+name : indexs_D2,indexs_D4,indexs_D8,indexs_D16,indexs_D32,indexs_D64
+It is a list of index of group that contain Di (in the list get from SmallGroups).
+end load file */
+
+n := 4;
+m := 16;
+list := SmallGroups(4*n*m,func<G|not IsAbelian(G) and IsSolvable(G)>);
+
+
+/* function */
+
+
+function NontrivialMinimalNormalSubgroups(G)
+    normSubs := NormalSubgroups(G);
+    nonTrivialNormSubs := [ N`subgroup : N in normSubs | #N`subgroup gt 1 and #N`subgroup lt #G ];
+
+    // 寻找极小正规子群：无其他非平凡正规子群严格包含于其中
+    minimalNormals := [];
+    for N in nonTrivialNormSubs do
+        isMinimal := true;
+        for M in nonTrivialNormSubs do
+            if M ne N and M subset N then
+                isMinimal := false;
+                break;
+            end if;
+        end for;
+        if isMinimal then
+            Append(~minimalNormals, N);
+        end if;
+    end for;
+    return minimalNormals;
+end function;
+
+function NontrivialAbelianMinimalNormalSubgroups(G)
+    minimalAbelianNormals := [];
+    minimalNormals := NontrivialMinimalNormalSubgroups(G);
+    for N in minimalNormals do
+        if IsAbelian(N) then
+            Append(~minimalAbelianNormals,N);
+        end if;
+    end for;
+    return minimalAbelianNormals;
+end function;
+
+
+procedure printList(row)
+    printf "[";
+    printf "%4o", row[1];
+    for j := 2 to #row do
+        printf ",%3o", row[j];
+    end for;
+    printf " ]\n";
+end procedure;
+
+
+function FindCommonElements(sortedA, sortedB)
+    commonList := [];  
+    idxA := 1;         
+    idxB := 1;         
+    
+    while idxA le #sortedA and idxB le #sortedB do
+        if sortedA[idxA] eq sortedB[idxB] then
+            Append(~commonList, sortedA[idxA]);
+            idxA +:= 1;  
+            idxB +:= 1;
+        elif sortedA[idxA] lt sortedB[idxB] then
+            idxA +:= 1;  
+        else
+            idxB +:= 1;  
+        end if;
+    end while;
+    
+    return commonList;
+end function;
+
+
+function isHKsubGroup(G, H, K)
+    I := H meet K;
+    S := sub<G | H,K>;
+    if Order(S) eq (Order(H) * Order(K))/Order(I) then
+        return true;
+    end if;
+    return false;
+end function;
+
+function CountElementsOfOrder(G, k)
+    count := 0;
+    for g in G do
+        if Order(g) eq k then
+            count +:= 1;
+        end if;
+    end for;
+    return count;
+end function;
+
+function IsIsoDn(H,n)
+/*
+    if IsAbelian(H) then
+        return false; 
+    end if;
+    if not IsSolvable(H) then
+        return false;
+    end if;
+*/
+
+    requiredOrder2 := (n mod 2 eq 0) select n+1 else n;
+    if CountElementsOfOrder(H, 2) ne requiredOrder2 then 
+        return false; 
+    end if;
+    
+    if CountElementsOfOrder(H, n) ne EulerPhi(n) then
+        return false;
+    end if;
+    
+    hasCyclicIndex2 := false;
+    for K in Subgroups(H : IndexEqual := 2) do
+        if IsCyclic(K`subgroup) then
+            hasCyclicIndex2 := true;
+            break;
+        end if;
+    end for;
+    
+    if not hasCyclicIndex2 then 
+        return false;
+    end if;
+    
+    return IsIsomorphic(H,DihedralGroup(n));
+    
+end function;
+
+function DihedralGenerators(H)
+    for a in H do 
+        for b in H do 
+            if Order(a) eq #H/2 and Order(b) eq 2 then 
+                H1 := sub<H | a,b>;
+                if #H1 eq #H then 
+                    return a,b;
+                end if;
+            end if;
+        end for;
+    end for;
+    "logical error";
+end function;
+/* function */
+
+
+/* start build list2 */ 
+list2 := FindCommonElements(indexs_D16,indexs_D4);
+/* end build list2 */
+#list2;
+
+
+//seqs is a list for the result
+globalStart := Realtime();
+count := 0;
+seqs := [];
+indexsOfExactProduct := [];//save index of list2
+indexsOfExactProduct2 := [];//save index of list
+for index in list2 do 
+    G := list[index];
+    count := count +1;
+    count;//for debug.
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m) | IsSolvable(K`subgroup) and not IsAbelian(K`subgroup)];
+    subD2n := [];
+    subD2m := [];
+    potential_combine := [];
+    potential_sub1 := {};
+    potential_sub2 := {};
+    for i in [1 .. #sub_2n] do
+        for j in [1 .. #sub_2m] do 
+            if #(sub_2n[i] meet sub_2m[j]) eq 1 then
+                Append(~potential_combine,[i,j]);
+                Include(~potential_sub1,i);
+                Include(~potential_sub2,j);
+            end if;
+        end for;
+    end for;
+    
+    for i in potential_sub1 do
+        if not IsIsoDn(sub_2n[i],n) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][1] eq i then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for j in potential_sub2 do
+        if not IsIsoDn(sub_2m[j],m) then
+            t := #potential_combine;
+            for k in [0 .. t-1] do
+                if potential_combine[t-k][2] eq j then 
+                    Remove(~potential_combine,t-k);
+                end if;
+            end for;
+        end if;
+    end for;
+    for combine in potential_combine do 
+        Append(~dihedralsForG,[sub_2n[combine[1]],sub_2m[combine[2]]]);
+    end for;
+    
+    
+    //deal with G with H and K already found.
+    if #dihedralsForG ne 0 then
+        Append(~indexsOfExactProduct,count);
+        Append(~indexsOfExactProduct2,index);
+    end if;
+end for;
+totalElapsed := Realtime(globalStart);
+printf "\nCounting indexsOfExactProduct total execution time: %o seconds\n", totalElapsed;
+
+
+
+//given a list2[] and seqs[][]
+//given a list indexsOfExactProduct element is index of which is exact product of dihedral Group.
+
+/*  H is the lower bound and H should be group.
+    Return a list which element is group */
+function MaximalSubgroupContaining(G,H)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        if H subset M then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+/*  L is the lower bound,U is the upper bound. L and U can be set.
+    Return a list which element is group */
+function MaximalSubgroupBetween(G,L,U)
+    list := MaximalSubgroups(G);//list here is type SeqEnum, it computes when you use it.
+    list_return := [];
+    for M in list do
+        M_set := {a : a in M };
+        L_set := {a : a in L };
+        U_set := {a : a in U };
+        if L_set subset M_set and M_set subset U_set then
+            Append(~list_return,M);
+        end if;
+    end for;
+    return list_return;
+end function;
+
+
+
+for i in indexsOfExactProduct2 do
+    G := list[i];
+    dihedralsForG := [];// This is for saving the exact product H and K for given G,element is a list
+    sub_2n := [K`subgroup : K in Subgroups(G : OrderEqual := 2*n)];
+    sub_2m := [K`subgroup : K in Subgroups(G : OrderEqual := 2*m)];
+    subD2n := [];
+    subD2m := [];
+    for sub1 in sub_2n do
+        if IsIsoDn(sub1,n) then
+            Append(~subD2n,sub1);
+        end if;
+    end for;
+    for sub2 in sub_2m do
+        if IsIsoDn(sub2,m) then
+            Append(~subD2m,sub2);
+        end if;
+    end for;
+    for sub1 in subD2n do
+        for sub2 in subD2m do
+            if #(sub1 meet sub2) eq 1 then
+                Append(~dihedralsForG,[sub1,sub2]);
+                break sub1;
+            end if;
+        end for;
+    end for;
+    H := dihedralsForG[1][1];
+    K := dihedralsForG[1][2];
+    a,b := DihedralGenerators(H);//find the generators
+    c,d := DihedralGenerators(K);//alert if M contain a reflection ,this d might not be the one in M !!!!!
+
+    //1. index.
+
+    //2. <c,d>_X的大小
+    size_cd_X := #Core(G,sub<K|c,d>);
+    
+    //3. <a,b>_X的大小
+    size_ab_X := #Core(G,sub<H|a,b>);
+    
+    //4. 是否存在交换的正规子群
+    flag_existAbelianNormal := 0;
+    abelianNormals := NontrivialAbelianMinimalNormalSubgroups(G);
+    if #abelianNormals ne 0 then
+        flag_existAbelianNormal := 1;
+    end if;
+    
+    //5. 如果存在交换的极小正规子群N，算一下(N*<c,d>)_X的大小，输出0说明无交换的正规子群
+    size_Ncd := 0;
+    new_Core := G;//don't mean it,"G" is a temp value.
+    if flag_existAbelianNormal eq 1 then
+        abelianNormalSub := abelianNormals[1];
+        new_Core := Core(G,sub<G|abelianNormalSub,c,d>);
+        size_Ncd := #new_Core;
+    end if;
+    
+    //6. 看一下X/K中<a,b>交<c,d>的大小，输出0说明无交换的正规子群，从而无new core
+    size_ab_cd := 0;
+    if size_Ncd ne 0 then
+        G_hat,proj := quo<G | new_Core>;
+        size_ab_cd := #(proj(sub<G|a,b>) meet proj(sub<G|c,d>));
+    end if;
+    
+    //7. 计算(N*<a,b>)_X
+    size_Nab := 0;
+    new_Core_Nab := G;//don't mean it,"G" is a temp value.
+    if flag_existAbelianNormal eq 1 then
+        abelianNormalSub := abelianNormals[1];
+        new_Core_Nab := Core(G,sub<G|abelianNormalSub,a,b>);
+        size_Nab := #new_Core_Nab;
+    end if;
+    
+    //8. Core(Nab)的情况,看一下X/K中<a,b>交<c,d>的大小，输出0说明无交换的正规子群，从而无new core
+    size_ab_cd2 := 0;
+    if size_Nab ne 0 then
+        G_hat2,proj2 := quo<G | new_Core_Nab>;
+        size_ab_cd2 := #(proj2(sub<G|a,b>) meet proj2(sub<G|c,d>));
+    end if;
+    
+    //9. Core-free的时候，观察一下Sylow-2子群的大小
+    sylow2 := Sylow(G,2);
+    
+    //10. 判断Sylow-2子群是否为初等交换的(Sylow-2子群共轭所以结构都一样)
+    flag_sylow2_ElementaryAbelian := 0;
+    if IsElementaryAbelian(sylow2) then 
+        flag_sylow2_ElementaryAbelian := 1;
+    end if;
+    //11. 直接看交换的初等交换2群最大多大(需要正规)
+    
+    maximalNormalAbelian2size := 0;
+    normSubs := NormalSubgroups(G);//正规的情况
+    abelian2NormSubs := [ N`subgroup : N in normSubs | IsElementaryAbelian(N`subgroup) and (#N`subgroup mod 2) eq 0 or #N`subgroup eq 1];
+    for sub in abelian2NormSubs do
+        if #sub gt maximalNormalAbelian2size then
+            maximalNormalAbelian2size := #sub;
+        end if;
+    end for;
+/* 非正规的情况
+    subs :=Subgroups(G);
+    abelian2Subs := [ N`subgroup : N in subs | IsElementaryAbelian(N`subgroup) and (#N`subgroup mod 2) eq 0 or #N`subgroup eq 1];
+    maximal2Size := 1;
+    for sub in abelian2Subs do
+        if #sub gt maximal2Size then
+            maximal2Size := #sub;
+        end if;
+    end for;
+*/
+
+    //12. exist M = <a,b><c1> is maximal in X.
+    flag_exist_Maximal := 0;
+    product_Hc := {};
+    for a in H do
+        for b in sub< G | c > do
+            Include(~product_Hc, a*b);
+        end for;
+    end for;
+    maximalList2 := MaximalSubgroupBetween(G,H,product_Hc);
+    if #maximalList2 ne 0 then
+        flag_exist_Maximal := 1;
+    end if;
+    
+    //13. exist M = <a1><c,d> is maximal in X.
+    flag_exist_Maximal3 := 0;
+    product_aK := {};
+    for e1 in sub< G | a > do
+        for e2 in K do
+            Include(~product_aK, e1*e2);
+        end for;
+    end for;
+    maximalList3 := MaximalSubgroupBetween(G,K,product_aK);
+    if #maximalList3 ne 0 then
+        flag_exist_Maximal3 := 1;
+    end if;
+    
+    //print
+    row := [i, size_cd_X, size_ab_X, flag_existAbelianNormal, size_Ncd, size_ab_cd, size_Nab, size_ab_cd2, #sylow2, flag_sylow2_ElementaryAbelian, maximalNormalAbelian2size, flag_exist_Maximal, flag_exist_Maximal3];
+    printList(row);
+end for;
+
+["index","<c,d>_X","<a,b>_X","existAbelianNormal","Core_Ncd size","ab meet cd in G/Core_Ncd","Core_Nab size","ab meet cd in G/Core_Nab","Sylow-2 size","Sylow-2 Abelian","maximal2Size"];

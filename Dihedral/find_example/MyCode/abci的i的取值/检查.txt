@@ -1,0 +1,39 @@
+L := H;
+U := product_Hc;
+
+
+
+list3 := Subgroups(G);//list here is type SeqEnum, it computes when you use it.
+list3_all := Subgroups(G: Presentation := false);
+#list3;
+#list3_all;
+
+//list3 := [ N`subgroup : N in Subgroups(G : OrderEqual := 2*n)| IsIsoDn(N`subgroup,n)];
+list3 := [ N`subgroup : N in Subgroups(G)];
+list_return := [];
+
+for M in list3 do
+    M_set := {a : a in M};//M_set := {a : a in H };
+    L_set := {a : a in L };
+    U_set := {a : a in U };
+    if L_set subset M_set and M_set subset U_set then
+        Append(~list_return,M);
+    end if;
+end for;
+
+count := 1;
+for M in list3 do
+    if IsConjugate(G,M,H) then 
+        count;
+    end if;
+    count +:=1;
+end for;
+
+
+count := 1;
+for M in list3 do
+    if M`subgroup eq sub<G|a,b> then 
+        count;
+    end if;
+    count +:=1;
+end for;
